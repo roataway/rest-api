@@ -37,16 +37,16 @@ Prerequisites
 Virtualenv
 ----------
 
-#. Create the virtualenv `virtualenv venv-roatarest` to install the dependencies in it
-#. Activate the venv with `source venv-roatarest/bin/activate`
-#. Install the dependencies with `pip install -r requirements.txt`
+1. Create the virtualenv `virtualenv venv-roatarest` to install the dependencies in it
+2. Activate the venv with `source venv-roatarest/bin/activate`
+3. Install the dependencies with `pip install -r requirements.txt`
 
 
 Pipenv
 ------
 
-#. Install pipenv `pip install pipenv`
-#. Then run `pipenv install --dev`. It will deal automatically with the venv creation and dependecy installing
+1. Install pipenv `pip install pipenv`
+2. Then run `pipenv install --dev`. It will deal automatically with the venv creation and dependecy installing
 
 
 How to contribute
