@@ -15,10 +15,10 @@ API'ul propriu-zis
 - `tracker/<tracker_id>` - returnează un JSON cu ultima informație cunoscută despre `tracker_id`. Dacă parametrul `tracker_id` e absent, va returna un JSON cu toate trackerele cunoscute.
 
 TODO 
-- ``station/<station_id>`` - returnează lista timpului de așteptare în stația respectivă, pentru toate rutele
-- ``station/<station_id>/<route_id>`` - returnează lista timpului de așteptare în stația respectivă, pentru ruta respectivă
-- ``stations/<route_id>`` - returnează lista identificatoarelor stațiilor asociate cu o rută specifică
-- ``transport/<route_id>`` - returnează lista datelor telemetrice despre istoria pozițiilor unităților de transport de pe o rută
+- `station/<station_id>` - returnează lista timpului de așteptare în stația respectivă, pentru toate rutele
+- `station/<station_id>/<route_id>` - returnează lista timpului de așteptare în stația respectivă, pentru ruta respectivă
+- `stations/<route_id>` - returnează lista identificatoarelor stațiilor asociate cu o rută specifică
+- `transport/<route_id>` - returnează lista datelor telemetrice despre istoria pozițiilor unităților de transport de pe o rută
 
 How to run it
 =============
@@ -26,31 +26,32 @@ How to run it
 Prerequisites
 -------------
 
-#. Make a copy of ``res/config-sample.yaml`` to your own config file, e.g. ``config-development.yaml``, supplying the required information in the file
-#. Replicate the environment using ``virtualenv`` or ``pipenv``, as described below
-#. When done, run it with ``python main.py res/config-development.yaml``
+1. Make a copy of `res/config-sample.yaml` to your own config file, e.g. `config-development.yaml`, supplying the required information in the file
+2. Replicate the environment using `virtualenv` or `pipenv`, as described below
+3. When done, run it with `python main.py res/config-development.yaml`
 
-The credentials as well as the server connection details are deliberately not a part of this repository. They can be found on rtec.dekart.com/infodash. The ability to figure it out on your own is the qualification barrier for getting started with this bot. Note that ``infodash`` uses WebSTOMP, rather than MQTT; however, the credentials are the same.
+- The credentials as well as the server connection details are given in the [API documentation](https://github.com/roataway/api-documentation)
+- Information about [routes and vehicles](https://github.com/roataway/infrastructure-data)
 
 
 Virtualenv
 ----------
 
-#. Create the virtualenv ``virtualenv venv-infopanel-chatbot`` to install the dependencies in it
-#. Activate the venv with ``source venv-infopanel-chatbot/bin/activate``
-#. Install the dependencies with ``pip install -r requirements.txt``
+#. Create the virtualenv `virtualenv venv-roatarest` to install the dependencies in it
+#. Activate the venv with `source venv-roatarest/bin/activate`
+#. Install the dependencies with `pip install -r requirements.txt`
 
 
 Pipenv
 ------
 
-#. Install pipenv ``pip install pipenv``
-#. Then run ``pipenv install --dev``. It will deal automatically with the venv creation and dependecy installing
+#. Install pipenv `pip install pipenv`
+#. Then run `pipenv install --dev`. It will deal automatically with the venv creation and dependecy installing
 
 
 How to contribute
 =================
 
-1. Run ``make autoformat`` to format all ``.py`` files
-2. Run ``make verify`` and examine the output, looking for issues that need to be addressed
+1. Run `make autoformat` to format all `.py` files
+2. Run `make verify` and examine the output, looking for issues that need to be addressed
 
