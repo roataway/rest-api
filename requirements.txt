@@ -1,0 +1,3 @@
+paho-mqtt==1.4.0
+reyaml==0.2.1
+dataclasses==0.6

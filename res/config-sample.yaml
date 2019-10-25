@@ -1,0 +1,9 @@
+mqtt:
+    host: 127.0.0.1  # check https://github.com/roataway/api-documentation
+    port: 1883
+    username: ""
+    password: ""
+    topics:
+        - state/station/+
+        - telemetry/transport/+
+        - telemetry/route/+

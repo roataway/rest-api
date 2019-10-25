@@ -1,0 +1,66 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": [
+    "longitude",
+    "latitude",
+    "timestamp",
+    "speed",
+    "direction"
+  ],
+  "properties": {
+    "longitude": {
+      "$id": "#/properties/longitude",
+      "type": "number",
+      "title": "The longitude",
+      "default": 0.0,
+      "examples": [
+        28.887143
+      ]
+    },
+    "latitude": {
+      "$id": "#/properties/latitude",
+      "type": "number",
+      "title": "The latitude",
+      "default": 0.0,
+      "examples": [
+        47.026044
+      ]
+    },
+    "timestamp": {
+      "$id": "#/properties/timestamp",
+      "type": "string",
+      "title": "Timestamp",
+      "description": "The time in UTC, when the reading was made",
+      "default": "",
+      "examples": [
+        "2019-08-18T16:42:29Z"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "speed": {
+      "$id": "#/properties/speed",
+      "type": "integer",
+      "title": "Speed",
+      "description": "Vehicle speed, in km/h",
+      "default": 0,
+      "examples": [
+        0
+      ]
+    },
+    "direction": {
+      "$id": "#/properties/direction",
+      "type": "integer",
+      "title": "Direction",
+      "description": "Also referred to as azimuth",
+      "default": 0,
+      "examples": [
+        0
+      ]
+    }
+  }
+}
+
