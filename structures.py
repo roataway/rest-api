@@ -74,6 +74,3 @@ class Tracker:
             "timestamp": self.timestamp.strftime(c.FORMAT_TIME),
         }
         return result
-
-    def update_from_msg(self, msg):
-        pass

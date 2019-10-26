@@ -34,13 +34,14 @@ class Subscriber:
 
     def get_tracker(self, tracker_id=None):
         """Retrieve information about a specific vehicle
-        :param tracker_id: str, tracker identifier"""
+        :param tracker_id: str, tracker identifier
+        """
+        
         log.debug("Get vehicle %s", tracker_id)
-        if tracker_id is not None:
-            try:
-                return jsonify(self.trackers[tracker_id])
-            except KeyError:
-                return Response("No such tracker", status=404)
+        if tracker_id is not None and tracker_id in self.trackers:
+            return jsonify(self.trackers[tracker_id])
+        else:
+            return Response("No such tracker", status=404)
 
         response = {}
         for tracker_id, meta in self.trackers.items():
@@ -59,9 +60,17 @@ class Subscriber:
         # state dictionary with fresh data
         data = json.loads(msg.payload)
         tracker_id = msg.topic.split("/")[-1]
-        try:
+        
+        if tracker_id in self.trackers:
             state = self.trackers[tracker_id]
-        except KeyError:
+            state.latitude = data["latitude"]
+            state.longitude = data["longitude"]
+            state.direction = data["direction"]
+            state.speed = data["speed"]
+            state.timestamp = datetime.strptime(
+                data["timestamp"], constants.FORMAT_TIME
+            )
+        else:
             vehicle = Tracker(
                 data["latitude"],
                 data["longitude"],
@@ -70,24 +79,12 @@ class Subscriber:
                 data["speed"],
             )
             self.trackers[tracker_id] = vehicle
-        else:
-            state.latitude = data["latitude"]
-            state.longitude = data["longitude"]
-            state.direction = data["direction"]
-            state.speed = data["speed"]
-            state.timestamp = datetime.strptime(
-                data["timestamp"], constants.FORMAT_TIME
-            )
-
-    def _handle_station_update(self, msg):
-        print(msg.paylod)
 
     def _handle_route_update(self, msg):
         data = json.loads(msg.payload)
 
     def on_mqtt(self, client, userdata, msg):
         topic_handlers = {
-            "state/station": self._handle_station_update,
             "telemetry/transport": self._handle_transport_update,
             "telemetry/route": self._handle_route_update,
         }
@@ -100,9 +97,10 @@ class Subscriber:
             return
 
         topic = msg.topic.rsplit("/", 1)[0]
-        try:
+        
+        if topic in topic_handlers:
             topic_handlers[topic](msg)
-        except KeyError:
+        else:
             log.debug("Can't handle messages from topic %s", msg.topic)
 
         return
