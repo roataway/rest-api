@@ -38,6 +38,7 @@ if __name__ == "__main__":
     subscriber.serve()
 
     app = Flask('roatarest')
+    app.url_map.strict_slashes = False
     app.add_url_rule('/', 'index', subscriber.index)
     app.add_url_rule('/tracker/<tracker_id>', 'tracker', subscriber.get_tracker)
     app.add_url_rule('/tracker', 'tracker_all', subscriber.get_tracker)
