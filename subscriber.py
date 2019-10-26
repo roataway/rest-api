@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime
 
-from flask import Response
+from flask import Response, jsonify
 
 import constants
 from structures import Tracker
@@ -38,18 +38,18 @@ class Subscriber:
         log.debug('Get vehicle %s', tracker_id)
         if tracker_id is not None:
             try:
-                return self.trackers[tracker_id].to_json()
+                return jsonify(self.trackers[tracker_id])
             except KeyError:
                 return Response("No such tracker", status=404)
 
         response = {}
         for tracker_id, meta in self.trackers.items():
             response[tracker_id] = meta.to_dict()
-        return json.dumps(response)
+        return jsonify(response)
 
     def index(self):
         response = {'trackers': len(self.trackers), 'predictions': len(self.predictions)}
-        return json.dumps(response)
+        return jsonify(response)
 
 
     def on_mqtt(self, client, userdata, msg):
