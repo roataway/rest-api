@@ -20,7 +20,7 @@ class Subscriber:
 
         # this will contain the last known state of each vehicle
         self.trackers = {}
-
+        self.routes = {}
         self.predictions = {}
 
     def serve(self):
@@ -29,13 +29,13 @@ class Subscriber:
         self.mqtt.set_external_handler(self.on_mqtt)
         for topic in self.subscribe_to:
             self.mqtt.client.subscribe((topic, constants.QOS_MAYBE))
-        log.info('Starting MQTT loop')
+        log.info("Starting MQTT loop")
         self.mqtt.client.loop_start()
 
     def get_tracker(self, tracker_id=None):
-        '''Retrieve information about a specific vehicle
-        :param tracker_id: str, tracker identifier'''
-        log.debug('Get vehicle %s', tracker_id)
+        """Retrieve information about a specific vehicle
+        :param tracker_id: str, tracker identifier"""
+        log.debug("Get vehicle %s", tracker_id)
         if tracker_id is not None:
             try:
                 return jsonify(self.trackers[tracker_id])
@@ -48,29 +48,50 @@ class Subscriber:
         return jsonify(response)
 
     def index(self):
-        response = {'trackers': len(self.trackers), 'predictions': len(self.predictions)}
+        response = {
+            "trackers": len(self.trackers),
+            "predictions": len(self.predictions),
+        }
         return jsonify(response)
 
-    
     def _handle_transport_update(self, msg):
         # we're dealing with location data about the whereabouts of a vehicle. We update our vehicle
         # state dictionary with fresh data
         data = json.loads(msg.payload)
-        tracker_id = msg.topic.split('/')[-1]
+        tracker_id = msg.topic.split("/")[-1]
         try:
             state = self.trackers[tracker_id]
         except KeyError:
-            vehicle = Tracker(data['latitude'], data['longitude'], data['direction'], tracker_id, data['speed'])
+            vehicle = Tracker(
+                data["latitude"],
+                data["longitude"],
+                data["direction"],
+                tracker_id,
+                data["speed"],
+            )
             self.trackers[tracker_id] = vehicle
         else:
-            state.latitude = data['latitude']
-            state.longitude = data['longitude']
-            state.direction = data['direction']
-            state.speed = data['speed']
-            state.timestamp = datetime.strptime(data['timestamp'], constants.FORMAT_TIME)
+            state.latitude = data["latitude"]
+            state.longitude = data["longitude"]
+            state.direction = data["direction"]
+            state.speed = data["speed"]
+            state.timestamp = datetime.strptime(
+                data["timestamp"], constants.FORMAT_TIME
+            )
 
+    def _handle_station_update(self, msg):
+        print(msg.paylod)
+
+    def _handle_route_update(self, msg):
+        data = json.loads(msg.payload)
 
     def on_mqtt(self, client, userdata, msg):
+        topic_handlers = {
+            "state/station": self._handle_station_update,
+            "telemetry/transport": self._handle_transport_update,
+            "telemetry/route": self._handle_route_update,
+        }
+
         # log.debug('MQTT IN %s %i bytes `%s`', msg.topic, len(msg.payload), repr(msg.payload))
         try:
             data = json.loads(msg.payload)
@@ -78,8 +99,10 @@ class Subscriber:
             log.debug("Ignoring bad MQTT data %s", repr(msg.payload))
             return
 
-        if "station" in msg.topic:
-            pass
+        topic = msg.topic.rsplit("/", 1)[0]
+        try:
+            topic_handlers[topic](msg)
+        except KeyError:
+            log.debug("Can't handle messages from topic %s", msg.topic)
 
-        elif "transport" in msg.topic:
-            self._handle_transport_update(msg)
+        return

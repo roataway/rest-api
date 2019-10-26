@@ -14,8 +14,7 @@ log = logging.getLogger("restapi")
 
 if __name__ == "__main__":
     logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s %(levelname)5s %(name)5s - %(message)s",
+        level=logging.DEBUG, format="%(asctime)s %(levelname)5s %(name)5s - %(message)s"
     )
 
     log.info("Starting RoataREST v%s", c.VERSION)
@@ -37,9 +36,9 @@ if __name__ == "__main__":
     subscriber = Subscriber(mqtt, config["mqtt"]["topics"])
     subscriber.serve()
 
-    app = Flask('roatarest')
+    app = Flask("roatarest")
     app.url_map.strict_slashes = False
-    app.add_url_rule('/', 'index', subscriber.index)
-    app.add_url_rule('/tracker/<tracker_id>', 'tracker', subscriber.get_tracker)
-    app.add_url_rule('/tracker', 'tracker_all', subscriber.get_tracker)
+    app.add_url_rule("/", "index", subscriber.index)
+    app.add_url_rule("/tracker/<tracker_id>", "tracker", subscriber.get_tracker)
+    app.add_url_rule("/tracker", "tracker_all", subscriber.get_tracker)
     app.run(host="0.0.0.0", port=8000)

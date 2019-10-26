@@ -6,4 +6,4 @@ QOS_ATLEAST_ONCE = 1
 QOS_MAYBE = 0
 
 
-FORMAT_TIME = '%Y-%m-%dT%H:%M:%SZ'
+FORMAT_TIME = "%Y-%m-%dT%H:%M:%SZ"
