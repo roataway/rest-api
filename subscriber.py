@@ -51,6 +51,24 @@ class Subscriber:
         response = {'trackers': len(self.trackers), 'predictions': len(self.predictions)}
         return jsonify(response)
 
+    
+    def _handle_transport_update(self, msg):
+        # we're dealing with location data about the whereabouts of a vehicle. We update our vehicle
+        # state dictionary with fresh data
+        data = json.loads(msg.payload)
+        tracker_id = msg.topic.split('/')[-1]
+        try:
+            state = self.trackers[tracker_id]
+        except KeyError:
+            vehicle = Tracker(data['latitude'], data['longitude'], data['direction'], tracker_id, data['speed'])
+            self.trackers[tracker_id] = vehicle
+        else:
+            state.latitude = data['latitude']
+            state.longitude = data['longitude']
+            state.direction = data['direction']
+            state.speed = data['speed']
+            state.timestamp = datetime.strptime(data['timestamp'], constants.FORMAT_TIME)
+
 
     def on_mqtt(self, client, userdata, msg):
         # log.debug('MQTT IN %s %i bytes `%s`', msg.topic, len(msg.payload), repr(msg.payload))
@@ -64,18 +82,4 @@ class Subscriber:
             pass
 
         elif "transport" in msg.topic:
-            # we're dealing with location data about the whereabouts of a vehicle. We update our vehicle
-            # state dictionary with fresh data
-            tracker_id = msg.topic.split('/')[-1]
-            try:
-                state = self.trackers[tracker_id]
-            except KeyError:
-                vehicle = Tracker(data['latitude'], data['longitude'], data['direction'], tracker_id, data['speed'])
-                self.trackers[tracker_id] = vehicle
-            else:
-                state.latitude = data['latitude']
-                state.longitude = data['longitude']
-                state.direction = data['direction']
-                state.speed = data['speed']
-                state.timestamp = datetime.strptime(data['timestamp'], constants.FORMAT_TIME)
-
+            self._handle_transport_update(msg)
