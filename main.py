@@ -34,7 +34,7 @@ if __name__ == "__main__":
         password=mqtt_conf["password"],
     )
 
-    subscriber = Subscriber(mqtt, config)
+    subscriber = Subscriber(mqtt, config["mqtt"]["topics"])
     subscriber.serve()
 
     app = Flask('roatarest')

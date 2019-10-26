@@ -11,12 +11,12 @@ log = logging.getLogger("restapi")
 
 
 class Subscriber:
-    def __init__(self, mqtt, config):
+    def __init__(self, mqtt, subscribe_to):
         """Constructor
         :param mqtt: instance of MqttClient object
-        :param config: dict, the raw config (normally loaded from YAML)"""
+        :param subscribe_to: list, list of topics to subscribe"""
         self.mqtt = mqtt
-        self.config = config
+        self.subscribe_to = subscribe_to
 
         # this will contain the last known state of each vehicle
         self.trackers = {}
@@ -27,7 +27,7 @@ class Subscriber:
         """The main loop"""
         # MQTT's loop won't block, it runs in a separate thread
         self.mqtt.set_external_handler(self.on_mqtt)
-        for topic in self.config['mqtt']['topics']:
+        for topic in self.subscribe_to:
             self.mqtt.client.subscribe((topic, constants.QOS_MAYBE))
         log.info('Starting MQTT loop')
         self.mqtt.client.loop_start()
@@ -77,5 +77,5 @@ class Subscriber:
                 state.longitude = data['longitude']
                 state.direction = data['direction']
                 state.speed = data['speed']
-                state.timestamp = datetime.strptime(data['timestamp'], c.FORMAT_TIME)
+                state.timestamp = datetime.strptime(data['timestamp'], constants.FORMAT_TIME)
 
