@@ -3,7 +3,7 @@ import sys
 import json
 from datetime import datetime
 
-from flask import Flask, Response
+from flask import Flask, Response, request
 from reyaml import load_from_file
 
 from structures import Tracker
@@ -24,6 +24,7 @@ class Subscriber:
         # this will contain the last known state of each vehicle
         self.trackers = {}
 
+        # TODO write the ETAs in this data structure
         self.predictions = {}
 
     def serve(self):
@@ -53,6 +54,37 @@ class Subscriber:
     def index(self):
         response = {'trackers': len(self.trackers), 'predictions': len(self.predictions)}
         return json.dumps(response)
+
+    def get_predictions_simple(self, station_id, route_id):
+        """Returns a simplified structure of ETAs for the given station_id and route_id,
+        the response format is as simple as possible, to make it easier to parse by certain
+        type of consumers, such as scripts executed within Asterisk dial plans.
+
+        :param station_id: int, station identifier in the DB
+        :param route_id: int, route identifier
+        :returns: string of the form `ETA1,ETA2,...ETAn`
+        Example: `5,15,25` OR `5` OR `null` (when no ETAs available)
+
+        Use case
+        - User dials the phone number
+        - User types via DTMF: <station_id>#, e.g.: 120#
+        - User types via DTMF: <route_id>#, e.g.: 30#
+        -> the voice machine uses text-to-speech to read out the ETAs
+        """
+        # If first_only is given in the request and is True, we only respond with the first ETA
+        first_only = bool(request.values.get('first_only', False))
+        log.debug('Get prediction station=%s, route=%s, first=%s', station_id, route_id, first_only)
+
+        # TODO write logic to retrieve real data from the local data structures
+        result = [5, 15, 25]
+
+        if not result:
+            return "null"
+
+        if first_only:
+            return str(result[0])
+        else:
+            return ','.join([str(item) for item in result])
 
 
     def on_mqtt(self, client, userdata, msg):
@@ -112,4 +144,5 @@ if __name__ == "__main__":
     app.add_url_rule('/', 'index', subscriber.index)
     app.add_url_rule('/tracker/<tracker_id>', 'tracker', subscriber.get_tracker)
     app.add_url_rule('/tracker', 'tracker_all', subscriber.get_tracker)
+    app.add_url_rule('/station/<station_id>/<route_id>', 'station_eta', subscriber.get_predictions_simple)
     app.run(host="0.0.0.0", port=8000)
