@@ -79,8 +79,8 @@ class Subscriber:
             return Response(json.dumps(response), mimetype='application/json')
 
     def index(self):
-        response = {'trackers': len(self.trackers), 'predictions': len(self.predictions)}
-        return json.dumps(response)
+        response = f"v{c.VERSION} running since {self.started_at.strftime('%d %b %H:%M')}\ntrackers: {len(self.trackers)}"
+        return Response(response, mimetype='text/plain')
 
 
     def on_mqtt(self, client, userdata, msg):
