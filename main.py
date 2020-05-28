@@ -6,6 +6,7 @@ import os
 import argparse
 
 from flask import Flask, Response
+import waitress
 from reyaml import load_from_file
 
 from structures import Tracker
@@ -124,4 +125,4 @@ if __name__ == "__main__":
     app.add_url_rule('/', 'index', subscriber.index)
     app.add_url_rule('/tracker/<tracker_id>', 'tracker', subscriber.get_tracker)
     app.add_url_rule('/tracker', 'tracker_all', subscriber.get_tracker)
-    app.run(host="0.0.0.0", port=8000)
+    waitress.serve(app, listen='*:8080')
