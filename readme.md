@@ -1,24 +1,67 @@
 Descriere generală
 ==================
 
-Acest mini web-server oferă informație despre starea troleibuzelor și a timpului de așteptare în stații, printr-un REST API. Actualizarea datelor se face prin MQTT.
+Acest mini web-server oferă informație despre starea troleibuzelor și (TODO) a timpului de așteptare în stații, printr-un REST API. Actualizarea datelor se face prin MQTT.
 
 Utilitatea acestuia constă în:
 
-- Obținerea unor date istorice despre poziția troleibuzelor, astfel încât https://github.com/roataway/web-ui să poată afișa ceva chiar din momentul în care pagina a fost deschisă (altfel trebuie să aștepți până când vin careva date prin websocket, pentru a desena ”coada” din spatele troleului).
+- Obținerea unor date istorice despre poziția troleibuzelor, astfel încât https://github.com/roataway/web-ui să poată afișa ceva chiar din momentul în care pagina a fost deschisă (altfel trebuie să aștepți până când vin careva date prin websocket).
 - Integrarea cu sisteme terțe, pentru care există doar opțiunea HTTP, de exemplu https://github.com/roataway/voice-robot.
 
 
 API'ul propriu-zis
 ==================
 
-- `tracker/<tracker_id>` - returnează un JSON cu ultima informație cunoscută despre `tracker_id`. Dacă parametrul `tracker_id` e absent, va returna un JSON cu toate trackerele cunoscute.
+`/` informație generală
+-----------------------
 
-TODO 
-- `station/<station_id>` - returnează lista timpului de așteptare în stația respectivă, pentru toate rutele
-- `station/<station_id>/<route_id>` - returnează lista timpului de așteptare în stația respectivă, pentru ruta respectivă
-- `stations/<route_id>` - returnează lista identificatoarelor stațiilor asociate cu o rută specifică
-- `transport/<route_id>` - returnează lista datelor telemetrice despre istoria pozițiilor unităților de transport de pe o rută
+Returnează un text în care se vede versiunea aplicației, data lansării și numărul de trackere cunoscute. Exemplu:
+
+```
+v1.2.0 running since 28 May 12:48
+trackers: 220
+```
+
+
+`tracker/<tracker_id>` date despre un tracker
+---------------------------------------------
+
+Returnează un JSON cu ultima informație cunoscută despre `tracker_id`. Dacă parametrul `tracker_id` e absent, va returna un JSON cu toate trackerele cunoscute. Opțiunea cea din urmă va genera un răspuns mare și nu ar trebui să fie abuzată. Exemplu de răspuns:
+
+```
+{"longitude": 28.935659, "latitude": 46.935407, "direction": 0, "board": "3917", "speed": 0, "timestamp": "2020-05-28T13:02:10Z"}
+```
+
+
+
+`route/<route_id>/trackers` trackere pe o rută
+----------------------------------------------
+
+Returnează un JSON cu ultima informație despre fiecare tracker asociat cu ruta dată.
+
+Exemplu de răspuns:
+
+```
+{
+   "010":{
+      "longitude":28.906452,
+      "latitude":46.954408,
+      "direction":133,
+      "board":"3917",
+      "speed":43,
+      "timestamp":"2020-05-28T12:50:55Z"
+   },
+   "005":{
+      "longitude":28.829662,
+      "latitude":47.022516,
+      "direction":0,
+      "board":"3901",
+      "speed":0,
+      "timestamp":"2020-05-28T12:50:41Z"
+   }
+}
+```
+
 
 How to run it
 =============

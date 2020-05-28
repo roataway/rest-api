@@ -3,7 +3,3 @@ mqtt:
     port: 1883
     username: ""
     password: ""
-    topics:
-        - state/station/+
-        - telemetry/transport/+
-        - telemetry/route/+
