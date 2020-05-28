@@ -6,14 +6,7 @@ log = logging.getLogger("mqtt")
 
 class MqttClient:
     def __init__(
-        self,
-        name,
-        broker="localhost",
-        port=1883,
-        username=None,
-        password=None,
-        will=None,
-        will_topic=None,
+        self, name, broker="localhost", port=1883, username=None, password=None, will=None, will_topic=None,
     ):
         """Create an MQTT client instance, with the optional possibility to set a
         last will.

@@ -97,12 +97,7 @@ trackers: {len(self.trackers)}"""
                 state = self.trackers[tracker_id]
             except KeyError:
                 vehicle = Tracker(
-                    data["latitude"],
-                    data["longitude"],
-                    data["direction"],
-                    data["board"],
-                    tracker_id,
-                    data["speed"],
+                    data["latitude"], data["longitude"], data["direction"], data["board"], tracker_id, data["speed"],
                 )
                 self.trackers[tracker_id] = vehicle
             else:
@@ -124,8 +119,7 @@ trackers: {len(self.trackers)}"""
 
 if __name__ == "__main__":
     logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s %(levelname)5s %(name)5s - %(message)s",
+        level=logging.DEBUG, format="%(asctime)s %(levelname)5s %(name)5s - %(message)s",
     )
 
     log.info("Starting RoataREST v%s", c.VERSION)
@@ -161,9 +155,7 @@ if __name__ == "__main__":
 
     app = Flask("roatarest")
     app.add_url_rule("/", "index", subscriber.index)
-    app.add_url_rule(
-        "/route/<route_id>/trackers", "tracker_route", subscriber.get_route_tracker
-    )
+    app.add_url_rule("/route/<route_id>/trackers", "tracker_route", subscriber.get_route_tracker)
 
     # these two might be unnecessary, leaving them enabled for now, let's see if there is an
     # actual demand for these

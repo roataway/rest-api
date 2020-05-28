@@ -5,9 +5,9 @@ help:
 	@echo  ''
 
 autoformat:
-	black *.py
+	black -l 120 *.py
 
 verify:
+	black -l 120 --check *.py
 	flake8 --config=.flake8 *.py
-	pylint --rcfile=.pylintrc *.py
 	bandit *.py
