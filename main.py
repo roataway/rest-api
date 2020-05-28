@@ -125,4 +125,8 @@ if __name__ == "__main__":
     app.add_url_rule('/', 'index', subscriber.index)
     app.add_url_rule('/tracker/<tracker_id>', 'tracker', subscriber.get_tracker)
     app.add_url_rule('/tracker', 'tracker_all', subscriber.get_tracker)
-    waitress.serve(app, listen='*:8080')
+
+    # To run this on Heroku, we have to use whatever port they've allocated for us,
+    # otherwise use a default port number (e.g., when testing locally)
+    listen_port = os.getenv('PORT', 8080)
+    waitress.serve(app, listen='*:%s' % listen_port)
