@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 import os
 import argparse
+from collections import defaultdict
 
 from flask import Flask, Response
 import waitress
@@ -25,7 +26,13 @@ class Subscriber:
         # this will contain the last known state of each vehicle
         self.trackers = {}
 
-        self.predictions = {}
+        # keep track of the time when the server was started, which might
+        # be useful when troubleshooting behaiour on Heroku (perhaps it
+        # stopped the application, so the state was lost)
+        self.started_at = datetime.utcnow()
+
+        # dict that maps a route ID as a string, to a set of trackerIDs that belong to that route
+        self.routes = defaultdict(set)
 
     def serve(self):
         """The main loop"""
@@ -51,30 +58,46 @@ class Subscriber:
             response[tracker_id] = meta.to_dict()
         return json.dumps(response)
 
+    def get_route_tracker(self, route_id):
+        '''Retrieve information about all trackers on a specific route
+        :param route_id: int, route id'''
+        try:
+            trackers_on_route = self.routes[route_id]
+        except KeyError:
+            return Response("No such route", status=404)
+        else:
+            response = {}
+            for tracker_id in trackers_on_route:
+                try:
+                    response[tracker_id] = self.trackers[tracker_id].to_dict()
+                except KeyError:
+                    # this should never happen, but if it does, we remove it from
+                    # the route set
+                    log.debug('Referencing unknwon tracker %s', tracker_id)
+                    self.routes[route_id].remove(tracker_id)
+
+            return Response(json.dumps(response), mimetype='application/json')
+
     def index(self):
         response = {'trackers': len(self.trackers), 'predictions': len(self.predictions)}
         return json.dumps(response)
 
 
     def on_mqtt(self, client, userdata, msg):
-        # log.debug('MQTT IN %s %i bytes `%s`', msg.topic, len(msg.payload), repr(msg.payload))
         try:
             data = json.loads(msg.payload)
         except ValueError:
             log.debug("Ignoring bad MQTT data %s", repr(msg.payload))
             return
 
-        if "station" in msg.topic:
-            pass
-
-        elif "transport" in msg.topic:
-            # we're dealing with location data about the whereabouts of a vehicle. We update our vehicle
-            # state dictionary with fresh data
-            tracker_id = msg.topic.split('/')[-1]
+        if 'route' in msg.topic:
+            # this is route-specific location data
+            route_id = msg.topic.split('/')[-1]
+            tracker_id = data['rtu_id']
             try:
                 state = self.trackers[tracker_id]
             except KeyError:
-                vehicle = Tracker(data['latitude'], data['longitude'], data['direction'], tracker_id, data['speed'])
+                vehicle = Tracker(data['latitude'], data['longitude'], data['direction'], data['board'], tracker_id, data['speed'])
                 self.trackers[tracker_id] = vehicle
             else:
                 state.latitude = data['latitude']
@@ -82,6 +105,15 @@ class Subscriber:
                 state.direction = data['direction']
                 state.speed = data['speed']
                 state.timestamp = datetime.strptime(data['timestamp'], c.FORMAT_TIME)
+
+            self.routes[route_id].add(tracker_id)
+            return
+
+        if 'event' in msg.topic:
+            # this is a notification that tells us that a vehicle was removed from a route
+            route_id = msg.topic.split('/')[-1]
+            self.routes[route_id].remove(tracker_id = data['rtu_id'])
+            return
 
 
 if __name__ == "__main__":
@@ -123,6 +155,10 @@ if __name__ == "__main__":
 
     app = Flask('roatarest')
     app.add_url_rule('/', 'index', subscriber.index)
+    app.add_url_rule('/route/<route_id>/trackers', 'tracker_route', subscriber.get_route_tracker)
+
+    # these two might be unnecessary, leaving them enabled for now, let's see if there is an
+    # actual demand for these
     app.add_url_rule('/tracker/<tracker_id>', 'tracker', subscriber.get_tracker)
     app.add_url_rule('/tracker', 'tracker_all', subscriber.get_tracker)
 
