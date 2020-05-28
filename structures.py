@@ -54,13 +54,23 @@ class Tracker:
             self.timestamp = datetime.utcnow()
 
     def to_json(self):
-        result = {'longitude': self.longitude, 'latitude': self.latitude, 'direction': self.direction,
-                  'board': self.board_name, 'speed': self.speed,
-                  'timestamp': self.timestamp.strftime(c.FORMAT_TIME)}
+        result = {
+            "longitude": self.longitude,
+            "latitude": self.latitude,
+            "direction": self.direction,
+            "board": self.board_name,
+            "speed": self.speed,
+            "timestamp": self.timestamp.strftime(c.FORMAT_TIME),
+        }
         return json.dumps(result)
 
     def to_dict(self):
-        result = {'longitude': self.longitude, 'latitude': self.latitude, 'direction': self.direction,
-                  'board': self.board_name, 'speed': self.speed,
-                  'timestamp': self.timestamp.strftime(c.FORMAT_TIME)}
+        result = {
+            "longitude": self.longitude,
+            "latitude": self.latitude,
+            "direction": self.direction,
+            "board": self.board_name,
+            "speed": self.speed,
+            "timestamp": self.timestamp.strftime(c.FORMAT_TIME),
+        }
         return result
