@@ -56,7 +56,7 @@ class Subscriber:
         response = {}
         for tracker_id, meta in self.trackers.items():
             response[tracker_id] = meta.to_dict()
-        return json.dumps(response)
+        return Response(json.dumps(response), mimetype='application/json')
 
     def get_route_tracker(self, route_id):
         '''Retrieve information about all trackers on a specific route
