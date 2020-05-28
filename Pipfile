@@ -6,7 +6,7 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-paho-mqtt = "==1.4.0"
+paho-mqtt = "==1.5.0"
 reyaml = "==0.2.1"
 werkzeug = "*"
 flask = "*"

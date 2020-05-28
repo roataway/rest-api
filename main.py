@@ -2,6 +2,8 @@ import logging
 import sys
 import json
 from datetime import datetime
+import os
+import argparse
 
 from flask import Flask, Response
 from reyaml import load_from_file
@@ -14,12 +16,10 @@ log = logging.getLogger("restapi")
 
 
 class Subscriber:
-    def __init__(self, mqtt, config):
+    def __init__(self, mqtt):
         """Constructor
-        :param mqtt: instance of MqttClient object
-        :param config: dict, the raw config (normally loaded from YAML)"""
+        :param mqtt: instance of MqttClient object"""
         self.mqtt = mqtt
-        self.config = config
 
         # this will contain the last known state of each vehicle
         self.trackers = {}
@@ -30,7 +30,7 @@ class Subscriber:
         """The main loop"""
         # MQTT's loop won't block, it runs in a separate thread
         self.mqtt.set_external_handler(self.on_mqtt)
-        for topic in self.config['mqtt']['topics']:
+        for topic in c.ALL_TOPICS:
             self.mqtt.client.subscribe((topic, c.QOS_MAYBE))
         log.info('Starting MQTT loop')
         self.mqtt.client.loop_start()
@@ -91,21 +91,33 @@ if __name__ == "__main__":
 
     log.info("Starting RoataREST v%s", c.VERSION)
 
-    config_path = sys.argv[-1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', help='Path to config file', type=str, default='')
+    args = parser.parse_args()
 
-    log.info("Processing config from `%s`", config_path)
-    config = load_from_file(config_path)
 
-    mqtt_conf = config["mqtt"]
+    if args.config:
+        log.info("Processing config from `%s`", args.config)
+        config = load_from_file(args.config)
+    else:
+        log.info("Using config from environment variables")
+        # These are taken from https://github.com/roataway/api-documentation and are
+        # assumed constant
+        config = {'host': os.getenv('MQTT_HOST', 'opendata.dekart.com'),
+                  'port': os.getenv('MQTT_PORT', 1945),
+                  'username': os.getenv('MQTT_USER', None),
+                  'password': os.getenv('MQTT_PASS', None),
+                  }
+
     mqtt = MqttClient(
         name="roatarest",
-        broker=mqtt_conf["host"],
-        port=mqtt_conf["port"],
-        username=mqtt_conf["username"],
-        password=mqtt_conf["password"],
+        broker=config["host"],
+        port=config["port"],
+        username=config["username"],
+        password=config["password"]
     )
 
-    subscriber = Subscriber(mqtt, config)
+    subscriber = Subscriber(mqtt)
     subscriber.serve()
 
     app = Flask('roatarest')
